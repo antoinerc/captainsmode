@@ -1,11 +1,7 @@
-defmodule CaptainsmodeWeb.PageLiveTest do
+defmodule CaptainsmodeWeb.HomeLiveTest do
   use CaptainsmodeWeb.ConnCase
 
   import Phoenix.LiveViewTest
 
-  test "disconnected and connected render", %{conn: conn} do
-    {:ok, page_live, disconnected_html} = live(conn, "/")
-    assert disconnected_html =~ "Welcome to Phoenix!"
-    assert render(page_live) =~ "Welcome to Phoenix!"
-  end
+  # TODO: add some tests
 end

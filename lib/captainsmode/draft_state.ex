@@ -1,4 +1,4 @@
-defmodule Captainsmode.GameState do
+defmodule Captainsmode.DraftState do
   @type side :: :radiant | :dire
   @type status :: :pending | :ongoing
   @type phase :: {:first_ban, 2} | {:first_pick, 2} | {:second_ban, 3} | {:second_pick, 2} | {:third_ban, 2} | {:third_pick, 1}

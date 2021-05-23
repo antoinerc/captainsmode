@@ -17,7 +17,8 @@ defmodule CaptainsmodeWeb.Router do
   scope "/", CaptainsmodeWeb do
     pipe_through :browser
 
-    live "/", PageLive, :index
+    live "/", HomeLive, :index
+    live "/new-draft", HomeLive, :new_draft
   end
 
   # Other scopes may use custom stacks.

@@ -6,9 +6,9 @@ defmodule Captainsmode.HeroesTest do
   describe "heroes" do
     alias Captainsmode.Heroes.Hero
 
-    @valid_attrs %{img: "some img", name: "some name"}
-    @update_attrs %{img: "some updated img", name: "some updated name"}
-    @invalid_attrs %{img: nil, name: nil}
+    @valid_attrs %{img: "some img", name: "some name", json_id: 123}
+    @update_attrs %{img: "some updated img", name: "some updated name", json_id: 123}
+    @invalid_attrs %{img: nil, name: nil, json_id: nil}
 
     def hero_fixture(attrs \\ %{}) do
       {:ok, hero} =

@@ -1,6 +1,6 @@
-defmodule Captainsmode.GameSupervisor do
+defmodule Captainsmode.DraftSupervisor do
   @moduledoc """
-  Manage the state of the game servers
+  Manage the state of the Draft servers
   """
   use DynamicSupervisor
 
