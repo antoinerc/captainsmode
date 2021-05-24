@@ -4,26 +4,16 @@ defmodule Captainsmode.Drafts do
   """
   import Ecto.Changeset
 
-  def create_configuration_changeset(params \\ %{side: "random", timer_type: "default"}) do
-    data = %{}
-
-    types = %{
-      side: :string,
-      timer_type: :string,
-      pick_timer: :integer,
-      ban_timer: :integer,
-      reserve_timer: :integer
-    }
-
-    {data, types}
-    |> cast(params, Map.keys(types))
-    |> validate_required([:side, :timer_type])
-    |> validate_inclusion(:side, ["radiant", "dire", "random"])
-    |> validate_inclusion(:timer_type, ["default", "custom"])
-    |> validate_timers(params.timer_type)
-  end
-
-  def update_configuration_changeset(changeset, params \\ %{side: "random", timer_type: "default"} ) do
+  def change_configuration(
+        changeset,
+        params \\ %{
+          side: "random",
+          timer_type: "default",
+          pick_timer: 30,
+          ban_timer: 35,
+          reserve_timer: 130
+        }
+      ) do
     types = %{
       side: :string,
       timer_type: :string,
@@ -37,7 +27,7 @@ defmodule Captainsmode.Drafts do
     |> validate_required([:side, :timer_type])
     |> validate_inclusion(:side, ["radiant", "dire", "random"])
     |> validate_inclusion(:timer_type, ["default", "custom"])
-    |> validate_timers(params.timer_type)
+    |> validate_timers(params["timer_type"])
   end
 
   defp validate_timers(changeset, timer_type) do

@@ -10,7 +10,6 @@ defmodule CaptainsmodeWeb.HomeLive do
       <%= live_modal @socket, CaptainsmodeWeb.DraftFormComponent,
         id: :start_draft_modal,
         modal_class: "w-full max-w-md",
-        configuration: Captainsmode.Drafts.create_configuration_changeset(),
         return_to: Routes.home_path(@socket, :index) %>
     <% end %>
     """
