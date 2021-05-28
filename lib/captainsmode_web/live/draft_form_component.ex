@@ -26,13 +26,27 @@ defmodule CaptainsmodeWeb.DraftFormComponent do
         <div class="flex flex-col space-y-5">
           <div>
             <div class="input-label">Pick your side:</div>
-            <%= select f, :side, ["random", "radiant", "dire"], class: "input" %>
-            <%= error_tag f, :side %>
+            <div class="grid grid-flow-row grid-cols-3 grid-rows-1 gap-2 text-center">
+              <%= for side <- ["random", "radiant", "dire"] do %>
+              <%= radio_button f, :side, side, class: "hidden btn-radio-button" %>
+              <label for="user_form_side_<%= side %>">
+                <%= side %>
+              </label>
+              <% end %>
+              <%= error_tag f, :side %>
+            </div>
           </div>
           <div>
             <div class="input-label">Timer type:</div>
-            <%= select f, :timer_type, ["default", "custom"], class: "input" %>
-            <%= error_tag f, :timer_type %>
+            <div class="grid grid-flow-row grid-cols-2 grid-rows-1 gap-2 text-center">
+              <%= for timer_type <- ["default", "custom"] do %>
+              <%= radio_button f, :timer_type, timer_type, class: "hidden btn-radio-button" %>
+              <label for="user_form_timer_type_<%= timer_type %>">
+                <%= timer_type %>
+              </label>
+              <% end %>
+              <%= error_tag f, :timer_type %>
+            </div>
           </div>
           <div class="custom-timers <%= if String.equivalent?(@configuration.changes.timer_type, 'custom'), do: '', else: 'hidden' %>">
             <div>
