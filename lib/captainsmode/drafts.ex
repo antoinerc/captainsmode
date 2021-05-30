@@ -27,11 +27,11 @@ defmodule Captainsmode.Drafts do
     |> validate_required([:side, :timer_type])
     |> validate_inclusion(:side, ["radiant", "dire", "random"])
     |> validate_inclusion(:timer_type, ["default", "custom"])
-    |> validate_timers(params["timer_type"])
+    |> validate_timers(params.timer_type)
   end
 
   defp validate_timers(changeset, timer_type) do
-    case timer_type == "custom" do
+    case String.equivalent?(timer_type, 'custom') do
       true ->
         changeset
         |> validate_number(:pick_timer, greater_than_or_equal_to: 0)

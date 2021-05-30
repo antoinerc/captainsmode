@@ -31,22 +31,22 @@ defmodule Captainsmode.DraftsTest do
 
   describe "drafts" do
     test "configuration_changeset/1 returns no error when called with valid default configuration" do
-      changeset = Drafts.configuration_changeset(@valid_draft_attrs_default)
+      changeset = Drafts.change_configuration(%{}, @valid_draft_attrs_default)
       assert changeset.valid?
     end
 
     test "configuration_changeset/1 returns no error when called with valid custom configuration" do
-      changeset = Drafts.configuration_changeset(@valid_draft_attrs_custom)
+      changeset = Drafts.change_configuration(%{}, @valid_draft_attrs_custom)
       assert changeset.valid?
     end
 
     test "configuration_changeset/1 returns errors when called with invalid default configuration" do
-      changeset = Drafts.configuration_changeset(@invalid_draft_attrs_default)
+      changeset = Drafts.change_configuration(%{}, @invalid_draft_attrs_default)
       assert %{timer_type: ["is invalid"], side: ["is invalid"]} = errors_on(changeset)
     end
 
     test "configuration_changeset/1 returns errors when called with invalid custom configuration" do
-      changeset = Drafts.configuration_changeset(@invalid_draft_attrs_custom)
+      changeset = Drafts.change_configuration(%{}, @invalid_draft_attrs_custom)
 
       assert %{
                ban_timer: ["must be greater than or equal to 0"],
