@@ -12,13 +12,9 @@ defmodule CaptainsmodeWeb.NavComponentLive do
           </div>
         </div>
         <div class="w-1/2">
-          <div class="flex relative float-right">
-            <button class="btn-indigo" type="button">
-              <%= live_patch to: Routes.home_path(@socket, :new_draft), class: "" do %>
-                <%= gettext "Start a new draft" %>
-              <% end %>
-            </button>
-          </div>
+          <%= live_patch to: Routes.home_path(@socket, :new_draft), class: "float-right btn-indigo" do %>
+            <%= gettext "Start a new draft" %>
+          <% end %>
         </div>
       </div>
     </nav>
