@@ -21,6 +21,12 @@ defmodule CaptainsmodeWeb.Router do
     live "/new-draft", HomeLive, :new_draft
   end
 
+  scope "/drafts", CaptainsmodeWeb do
+    pipe_through :browser
+
+    live "/:draft_id", DraftLive, :show
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", CaptainsmodeWeb do
   #   pipe_through :api

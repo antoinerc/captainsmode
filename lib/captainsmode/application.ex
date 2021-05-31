@@ -5,6 +5,8 @@ defmodule Captainsmode.Application do
 
   use Application
 
+  alias Captainsmode
+
   def start(_type, _args) do
     children = [
       # Start the Ecto repository
@@ -14,9 +16,12 @@ defmodule Captainsmode.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: Captainsmode.PubSub},
       # Start the Endpoint (http/https)
-      CaptainsmodeWeb.Endpoint
+      CaptainsmodeWeb.Endpoint,
       # Start a worker by calling: Captainsmode.Worker.start_link(arg)
       # {Captainsmode.Worker, arg}
+      {Registry, keys: :unique, name: :draft_registry},
+
+      {Captainsmode.DraftSupervisor, []}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

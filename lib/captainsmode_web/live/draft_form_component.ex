@@ -7,7 +7,7 @@ defmodule CaptainsmodeWeb.DraftFormComponent do
   def update(assigns, socket) do
     socket = assign(socket, assigns)
     configuration = Captainsmode.Drafts.change_configuration(%{})
-    {:ok, assign(socket, configuration: configuration)}
+    {:ok, assign(socket, configuration: configuration, valid: true)}
   end
 
   @impl true
@@ -65,7 +65,7 @@ defmodule CaptainsmodeWeb.DraftFormComponent do
               <%= error_tag f, :reserve_timer %>
             </div>
           </div>
-          <%= submit "Start the draft", class: "btn-indigo" %>
+          <%= submit "Start the draft", class: "btn-indigo disabled:opacity-50 disabled:cursor-not-allowed", disabled: not @valid %>
         </div>
       </form>
     </div>
@@ -79,11 +79,32 @@ defmodule CaptainsmodeWeb.DraftFormComponent do
       |> Captainsmode.Drafts.change_configuration(data)
       |> Map.put(:action, :update)
 
-    {:noreply, assign(socket, configuration: changeset)}
+    {:noreply, assign(socket, configuration: changeset, valid: changeset.valid?)}
   end
 
   @impl true
-  def handle_event("create", test, socket) do
-    {:noreply, assign(socket, content: test)}
+  def handle_event("create", %{"configuration" => data}, socket) do
+    # Get latest version of draft configuration and start the new server.
+    Captainsmode.Drafts.change_configuration(data)
+    |> generate_draft_code()
+    |> ensure_game_process_is_started()
+    |> case do
+      {:ok, draft_server_id} ->
+        {:noreply, redirect(socket, to: Routes.draft_path(socket, :show, draft_server_id))}
+      {:error, _} ->  {:noreply, assign(socket, %{})}
+    end
+  end
+
+  defp ensure_game_process_is_started({:ok, draft_server_id}) do
+    case Captainsmode.DraftSupervisor.start_child({Captainsmode.DraftServer, draft_server_id}) do
+      {:ok, _pid} -> {:ok, draft_server_id}
+      {:error, {:already_started, _pid}} -> {:ok, draft_server_id}
+      _ -> {:error, draft_server_id}
+    end
+  end
+
+  defp generate_draft_code(_changeset) do
+    draft_server_id = Captainsmode.StringHelper.generate_random_hex(6)
+    {:ok, draft_server_id}
   end
 end
