@@ -25,18 +25,6 @@ defmodule CaptainsmodeWeb.DraftFormComponent do
                 phx_change: "validate" %>
         <div class="flex flex-col space-y-5">
           <div>
-            <div class="input-label">Pick your side:</div>
-            <div class="grid grid-flow-row grid-cols-3 grid-rows-1 gap-2 text-center">
-              <%= for side <- ["random", "radiant", "dire"] do %>
-              <%= radio_button f, :side, side, class: "hidden btn-radio-button" %>
-              <label for="user_form_side_<%= side %>">
-                <%= side %>
-              </label>
-              <% end %>
-              <%= error_tag f, :side %>
-            </div>
-          </div>
-          <div>
             <div class="input-label">Timer type:</div>
             <div class="grid grid-flow-row grid-cols-2 grid-rows-1 gap-2 text-center">
               <%= for timer_type <- ["default", "custom"] do %>
@@ -78,7 +66,7 @@ defmodule CaptainsmodeWeb.DraftFormComponent do
       socket.assigns.configuration
       |> Captainsmode.Drafts.change_configuration(data)
       |> Map.put(:action, :update)
-
+    IO.inspect(changeset)
     {:noreply, assign(socket, configuration: changeset, valid: changeset.valid?)}
   end
 

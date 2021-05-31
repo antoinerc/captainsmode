@@ -1,8 +1,7 @@
 defmodule Captainsmode.Drafts.DraftConfiguration do
-  defstruct [:side, :timer_type, :pick_timer, :ban_timer, :reserve_timer]
+  defstruct [:timer_type, :pick_timer, :ban_timer, :reserve_timer]
 
   @type t :: %__MODULE__{
-          side: String.t(),
           timer_type: String.t(),
           pick_timer: Integer.t(),
           ban_timer: Integer.t(),
@@ -14,7 +13,6 @@ defmodule Captainsmode.Drafts.DraftConfiguration do
   """
   def new() do
     %__MODULE__{
-      side: "random",
       timer_type: "default",
       pick_timer: 30,
       ban_timer: 35,
@@ -24,7 +22,6 @@ defmodule Captainsmode.Drafts.DraftConfiguration do
 
   def change(config, attrs \\ %{}) do
     {config, []}
-    |> change_side(attrs)
     |> change_timer_values(attrs)
     |> change_timer_type(attrs)
     |> case do
@@ -32,16 +29,6 @@ defmodule Captainsmode.Drafts.DraftConfiguration do
       {config, errors} -> {:error, errors, config}
     end
   end
-
-  defp change_side({config, errors}, %{"side" => side}) do
-    if side not in ["radiant", "dire", "random"] do
-      {config, [{:side, "not a valid side"} | errors]}
-    else
-      {%{config | side: side}, errors}
-    end
-  end
-
-  defp change_side({config, errors}, _attrs), do: {config, errors}
 
   defp change_timer_type({config, errors}, %{"timer_type" => "default"}) do
     {%{config | timer_type: "default"}, errors}

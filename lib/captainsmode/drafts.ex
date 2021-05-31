@@ -7,7 +7,6 @@ defmodule Captainsmode.Drafts do
   def change_configuration(
         changeset,
         params \\ %{
-          side: "random",
           timer_type: "default",
           pick_timer: 30,
           ban_timer: 35,
@@ -15,7 +14,6 @@ defmodule Captainsmode.Drafts do
         }
       ) do
     types = %{
-      side: :string,
       timer_type: :string,
       pick_timer: :integer,
       ban_timer: :integer,
@@ -24,8 +22,7 @@ defmodule Captainsmode.Drafts do
 
     {changeset, types}
     |> cast(params, Map.keys(types))
-    |> validate_required([:side, :timer_type])
-    |> validate_inclusion(:side, ["radiant", "dire", "random"])
+    |> validate_required([:timer_type])
     |> validate_inclusion(:timer_type, ["default", "custom"])
     |> validate_timers()
   end
