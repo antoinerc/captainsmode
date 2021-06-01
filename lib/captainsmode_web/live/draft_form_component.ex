@@ -66,7 +66,6 @@ defmodule CaptainsmodeWeb.DraftFormComponent do
       socket.assigns.configuration
       |> Captainsmode.Drafts.change_configuration(data)
       |> Map.put(:action, :update)
-    IO.inspect(changeset)
     {:noreply, assign(socket, configuration: changeset, valid: changeset.valid?)}
   end
 
