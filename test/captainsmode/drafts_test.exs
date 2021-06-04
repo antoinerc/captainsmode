@@ -2,6 +2,7 @@ defmodule Captainsmode.DraftsTest do
   use Captainsmode.DataCase
 
   alias Captainsmode.Drafts
+  alias Captainsmode.DraftsFixture
 
   @valid_draft_attrs_default %{
     side: "radiant",
@@ -42,7 +43,7 @@ defmodule Captainsmode.DraftsTest do
 
     test "configuration_changeset/1 returns errors when called with invalid default configuration" do
       changeset = Drafts.change_configuration(%{}, @invalid_draft_attrs_default)
-      assert %{timer_type: ["is invalid"], side: ["is invalid"]} = errors_on(changeset)
+      assert %{timer_type: ["is invalid"]} = errors_on(changeset)
     end
 
     test "configuration_changeset/1 returns errors when called with invalid custom configuration" do
@@ -53,6 +54,26 @@ defmodule Captainsmode.DraftsTest do
                pick_timer: ["must be greater than or equal to 0"],
                reserve_timer: ["must be greater than or equal to 0"]
              } = errors_on(changeset)
+    end
+
+    test "join_game/2 add the player to the participant list if not full and not already in" do
+      username = "john"
+      empty_state = DraftsFixture.draft_fixture()
+      {:ok, new_state} = Drafts.join(empty_state, username)
+      assert Enum.member?(new_state.participants, username)
+    end
+
+    test "join_game/2 returns an error if the player already joined" do
+      username = "john"
+      empty_state = DraftsFixture.draft_fixture()
+      {:ok, new_state} = Drafts.join(empty_state, username)
+      assert {:error, {:alread_joined, _}} = Drafts.join(new_state, username)
+    end
+
+    test "join_game/2 returns an error if the session is full" do
+      username = "bobby"
+      full_draft_state = DraftsFixture.full_draft_fixture()
+      assert {:error, {:session_full, _}} = Drafts.join(full_draft_state, username)
     end
   end
 end

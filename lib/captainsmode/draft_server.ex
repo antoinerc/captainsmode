@@ -11,6 +11,18 @@ defmodule Captainsmode.DraftServer do
     )
   end
 
+  @doc """
+  Add a player to the drafting session.
+  """
+  @spec join(String.t(), String.t()) :: term()
+  def join(draft_id, player_name) do
+    GenServer.call(via(draft_id), {:join, player_name})
+  end
+
+  def handle_call({:join, player_name}, _from, state) do
+
+  end
+
   @impl true
   def init(draft_id) do
     {:ok, %DraftState{id: draft_id}}
