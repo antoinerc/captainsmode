@@ -19,8 +19,28 @@ defmodule Captainsmode.DraftServer do
     GenServer.call(via(draft_id), {:join, player_name})
   end
 
-  def handle_call({:join, player_name}, _from, state) do
+  def change_side(draft_id, player_name, side) do
+    GenServer.call(via(draft_id), {:change_side, player_name, side})
+  end
 
+  @impl true
+  def handle_call({:join, player_name}, _from, state) do
+    with {:ok, new_state} <- Drafts.join(state, player_name) do
+      {:reply, {:ok, new_state}, new_state}
+    else
+      {:error, {code, state}} ->
+        {:reply, {:error, code, state}, state}
+    end
+  end
+
+  @impl true
+  def handle_call({:change_side, player_name, side}, _from, state) do
+    with {:ok, new_state} <- Drafts.change_side(state, player_name, side) do
+      {:reply, {:ok, new_state}, new_state}
+    else
+      {:error, {code, state}} ->
+        {:reply, {:error, code, state}, state}
+    end
   end
 
   @impl true

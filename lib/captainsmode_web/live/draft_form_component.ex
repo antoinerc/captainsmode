@@ -36,7 +36,7 @@ defmodule CaptainsmodeWeb.DraftFormComponent do
               <%= error_tag f, :timer_type %>
             </div>
           </div>
-          <div class="custom-timers <%= if String.equivalent?(@configuration.changes.timer_type, 'custom'), do: '', else: 'hidden' %>">
+          <div class="custom-timers <%= if String.equivalent?(@configuration.changes.timer_type, "custom"), do: '', else: 'hidden' %>">
             <div>
               <div class="input-label">Pick timer in seconds:</div>
               <%= number_input f, :pick_timer, class: "input" %>
@@ -66,6 +66,7 @@ defmodule CaptainsmodeWeb.DraftFormComponent do
       socket.assigns.configuration
       |> Captainsmode.Drafts.change_configuration(data)
       |> Map.put(:action, :update)
+
     {:noreply, assign(socket, configuration: changeset, valid: changeset.valid?)}
   end
 
@@ -78,7 +79,9 @@ defmodule CaptainsmodeWeb.DraftFormComponent do
     |> case do
       {:ok, draft_server_id} ->
         {:noreply, redirect(socket, to: Routes.draft_path(socket, :show, draft_server_id))}
-      {:error, _} ->  {:noreply, assign(socket, %{})}
+
+      {:error, _} ->
+        {:noreply, assign(socket, %{})}
     end
   end
 

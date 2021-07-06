@@ -6,7 +6,6 @@ defmodule CaptainsmodeWeb.HomeLive do
   @impl true
   def render(assigns) do
     ~L"""
-    <%= live_component @socket, CaptainsmodeWeb.NavComponentLive, id: :nav, username: assigns.username %>
     <%= if @live_action == :new_draft do %>
       <%= live_modal @socket, CaptainsmodeWeb.DraftFormComponent,
         id: :start_draft_modal,

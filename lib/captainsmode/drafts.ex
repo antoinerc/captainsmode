@@ -10,10 +10,20 @@ defmodule Captainsmode.Drafts do
     @enforce_keys [:username, :participants_count, :already_joined]
     defstruct [:username, :participants_count, :already_joined]
 
-    @type t :: %IncomingPlayerInfo{
+    @type t :: %__MODULE__{
             username: String.t(),
             participants_count: integer(),
             already_joined: boolean()
+          }
+  end
+
+  defmodule ChangeSideInfo do
+    @enforce_keys [:username, :side]
+    defstruct [:username, :side]
+
+    @type t :: %__MODULE__{
+            username: String.t(),
+            side: DraftState.side()
           }
   end
 
@@ -41,7 +51,7 @@ defmodule Captainsmode.Drafts do
   end
 
   defp validate_timers(changeset) do
-    case String.equivalent?(changeset.changes.timer_type, 'custom') do
+    case changeset.changes.timer_type === "custom" do
       true ->
         changeset
         |> validate_number(:pick_timer, greater_than_or_equal_to: 0)
@@ -58,6 +68,7 @@ defmodule Captainsmode.Drafts do
   def join(draft_state, player_name) do
     participants_count = length(draft_state.participants)
     is_already_in_game = Enum.any?(draft_state.participants, fn x -> x == player_name end)
+
     do_join(draft_state, %IncomingPlayerInfo{
       username: player_name,
       participants_count: participants_count,
@@ -65,10 +76,26 @@ defmodule Captainsmode.Drafts do
     })
   end
 
+  @spec change_side(DraftState.t(), String.t(), String.t()) ::
+          {:ok, DraftState.t()} | {:error, {atom(), DraftState.t()}}
+  def change_side(draft_state, player_name, side) do
+    side_atom =
+      case side do
+        "radiant" -> :radiant
+        "dire" -> :dire
+      end
+
+    change_side_info = %ChangeSideInfo{username: player_name, side: side_atom}
+    do_change_side(draft_state, change_side_info)
+  end
+
+  def is_draft_session_full?(%DraftState{participants: participants}),
+    do: length(participants) == 2
+
   defp do_join(draft_state, %IncomingPlayerInfo{
          username: _,
          participants_count: 2,
-         already_joined: _
+         already_joined: false
        }) do
     {:error, {:session_full, draft_state}}
   end
@@ -78,14 +105,64 @@ defmodule Captainsmode.Drafts do
          participants_count: _,
          already_joined: true
        }) do
-    {:error, {:alread_joined, draft_state}}
+    {:ok, draft_state}
   end
 
   defp do_join(draft_state, %IncomingPlayerInfo{
-    username: username,
-    participants_count: _,
-    already_joined: _
-  }) do
+         username: username,
+         participants_count: _,
+         already_joined: _
+       }) do
     {:ok, %DraftState{draft_state | participants: [username | draft_state.participants]}}
+  end
+
+  defp do_change_side(draft_state, %ChangeSideInfo{username: username, side: :radiant}) do
+    case draft_state.participants_sides do
+      %{radiant: nil, dire: ^username} ->
+        {:ok,
+         %DraftState{
+           draft_state
+           | participants_sides: %{
+               draft_state.participants_sides
+               | :radiant => username,
+                 :dire => nil
+             }
+         }}
+
+      %{radiant: nil, dire: _} ->
+        {:ok,
+         %DraftState{
+           draft_state
+           | participants_sides: %{draft_state.participants_sides | :radiant => username}
+         }}
+
+      _ ->
+        {:error, {:side_full, draft_state}}
+    end
+  end
+
+  defp do_change_side(draft_state, %ChangeSideInfo{username: username, side: :dire}) do
+    case draft_state.participants_sides do
+      %{dire: nil, radiant: ^username} ->
+        {:ok,
+         %DraftState{
+           draft_state
+           | participants_sides: %{
+               draft_state.participants_sides
+               | :dire => username,
+                 :radiant => nil
+             }
+         }}
+
+      %{dire: nil, radiant: _} ->
+        {:ok,
+         %DraftState{
+           draft_state
+           | participants_sides: %{draft_state.participants_sides | :dire => username}
+         }}
+
+      _ ->
+        {:error, {:side_full, draft_state}}
+    end
   end
 end

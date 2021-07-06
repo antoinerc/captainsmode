@@ -1,6 +1,7 @@
 const colors = require('tailwindcss/colors')
 
 module.exports = {
+  mode: 'jit',
   purge: [
     '../lib/**/*.ex',
     '../lib/**/*.leex',
@@ -532,6 +533,8 @@ module.exports = {
       full: '100%',
       min: 'min-content',
       max: 'max-content',
+      '1/4': '25%',
+      '1/2': '50%',
       prose: '65ch',
       ...breakpoints(theme('screens')),
     }),
@@ -803,14 +806,7 @@ module.exports = {
       50: '50',
     },
   },
-  variants: {
-    extend: {
-      backgroundColor: ['checked'],
-      borderColor: ['checked'],
-      opacity: ['disabled'],
-      cursor: ['disabled']
-    },
-  },
+  
   plugins: [
     require('@tailwindcss/forms'),
   ],

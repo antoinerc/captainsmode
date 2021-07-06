@@ -9,6 +9,5 @@ defmodule Captainsmode.Repo.Migrations.CreateHeroes do
 
       timestamps()
     end
-
   end
 end

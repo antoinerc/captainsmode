@@ -20,7 +20,6 @@ defmodule Captainsmode.Application do
       # Start a worker by calling: Captainsmode.Worker.start_link(arg)
       # {Captainsmode.Worker, arg}
       {Registry, keys: :unique, name: :draft_registry},
-
       {Captainsmode.DraftSupervisor, []}
     ]
 

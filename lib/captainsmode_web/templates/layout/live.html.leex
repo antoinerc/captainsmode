@@ -1,4 +1,5 @@
 <main role="main" class="container mx-auto">
+  <%= live_component @socket, CaptainsmodeWeb.NavComponentLive, id: :nav, username: assigns.username %>
   <p class="alert alert-info" role="alert"
     phx-click="lv:clear-flash"
     phx-value-key="info"><%= live_flash(@flash, :info) %></p>
