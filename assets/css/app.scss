@@ -62,6 +62,29 @@
     hover:bg-indigo-800;
 }
 
+.caret {
+  font-family: "Font Awesome 5 Free";
+  display: inline-block;
+  padding-right: 3px;
+  vertical-align: middle;
+  font-weight: 1000;
+  font-size: 30px;
+}
+
+.left-caret {
+  &:after {
+    @extend .caret;
+    content: "\f0d9"
+  }
+}
+
+.right-caret {
+  &:after {
+    @extend .caret;
+    content: "\f0da"
+  }
+}
+
 /* LiveView specific classes for your customizations */
 .phx-no-feedback.invalid-feedback,
 .phx-no-feedback .invalid-feedback {

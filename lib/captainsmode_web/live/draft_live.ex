@@ -12,21 +12,35 @@ defmodule CaptainsmodeWeb.DraftLive do
       Pick your side
     </h1>
     <% end %>
-    <div class="grid grid-cols-2 grid-rows-2 grid-flow-col mt-2 justify-items-center">
-      <label class="text-xl font-semibold">
-        <span class="mr-2 text-white">Radiant</span>
-        <%= if not all_sides_filled?(assigns.draft) do %>
-        <input class="form-radio text-green-600" type="radio" name="radiant" phx-click="change_side" value="radiant" <%= get_side_attributes(assigns, :radiant) %>>
-        <% end %>
-      </label>
-      <p class="text-white italic"><%= assigns.draft.participants_sides.radiant %></p>
-      <label class="text-xl font-semibold">
-        <%= if not all_sides_filled?(assigns.draft) do %>
-        <input class="form-radio text-red-600" type="radio" name="dire" phx-click="change_side" value="dire" <%= get_side_attributes(assigns, :dire) %>>
-        <% end %>
-        <span class="ml-2 text-white">Dire</span>
-      </label>
-      <p class="text-white italic"><%= assigns.draft.participants_sides.dire %></p>
+    <div class="grid grid-flow-col grid-rows-2 grid-cols-2 mt-2 justify-items-center">
+        <label class="text-xl font-semibold">
+          <span class="text-white">Radiant</span>
+          <%= if not all_sides_filled?(assigns.draft) do %>
+          <input class="form-radio text-green-600" type="radio" name="radiant" phx-click="change_side" value="radiant" <%= get_side_attributes(assigns, :radiant) %>>
+          <% end %>
+        </label>
+        <p class="text-white italic"><%= assigns.draft.participants_sides.radiant %></p>
+        <label class="text-xl font-semibold">
+          <%= if not all_sides_filled?(assigns.draft) do %>
+          <input class="form-radio text-red-600" type="radio" name="dire" phx-click="change_side" value="dire" <%= get_side_attributes(assigns, :dire) %>>
+          <% end %>
+          <span class="text-white">Dire</span>
+        </label>
+        <p class="text-white italic"><%= assigns.draft.participants_sides.dire %></p>
+    </div>
+    <div class="grid grid-cols-2 mt-1 justify-items-center">
+      <%= if all_sides_filled?(assigns.draft) do %>
+      <div class="grid grid-cols-1 gap-2">
+      <%= for phase when phase.side == :radiant <- assigns.draft.phases do %>
+        <div class="ring-4 <%= if phase.order == assigns.draft.current_phase, do: 'ring-opacity-100', else: 'ring-opacity-50' %> <%= get_ring_color(phase.type) %>"><%= phase.side %>-<%= phase.type %></div>
+      <% end %>
+      </div>
+      <div class="grid grid-cols-1 gap-2">
+      <%= for phase when phase.side == :dire <- assigns.draft.phases do %>
+        <div class="ring-4 <%= if phase.order == assigns.draft.current_phase, do: 'ring-opacity-100', else: 'ring-opacity-50' %> <%= get_ring_color(phase.type) %>"><%= phase.side %>-<%= phase.type %></div>
+      <% end %>
+      </div>
+      <% end %>
     </div>
     """
   end
@@ -71,6 +85,13 @@ defmodule CaptainsmodeWeb.DraftLive do
 
       _ ->
         "disabled"
+    end
+  end
+
+  def get_ring_color(side) do
+    case side do
+      :pick -> "ring-green-500"
+      :ban -> "ring-red-500"
     end
   end
 
