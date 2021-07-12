@@ -89,6 +89,24 @@ defmodule Captainsmode.Drafts do
     do_change_side(draft_state, change_side_info)
   end
 
+  def pick_hero(draft_state, hero_id) do
+    case Enum.member?(draft_state.phases, %{hero: hero_id}) do
+      true ->
+        {:error, {:hero_picker, draft_state}}
+
+      _ ->
+        current_phase_index =
+          Enum.find_index(draft_state.phases, fn phase -> phase.hero == nil end)
+
+        {:ok,
+         %DraftState{
+           draft_state
+           | phases:
+               List.update_at(draft_state.phases, current_phase_index, &%{&1 | hero: hero_id})
+         }}
+    end
+  end
+
   def is_draft_session_full?(%DraftState{participants: participants}),
     do: length(participants) == 2
 

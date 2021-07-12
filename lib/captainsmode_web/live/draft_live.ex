@@ -3,6 +3,7 @@ defmodule CaptainsmodeWeb.DraftLive do
 
   alias Captainsmode.DraftServer
   alias Captainsmode.DraftState
+  alias Captainsmode.Heroes
 
   @impl true
   def render(assigns) do
@@ -28,17 +29,10 @@ defmodule CaptainsmodeWeb.DraftLive do
         </label>
         <p class="text-white italic"><%= assigns.draft.participants_sides.dire %></p>
     </div>
-    <div class="grid grid-cols-2 mt-1 justify-items-center">
-      <%= if all_sides_filled?(assigns.draft) do %>
-      <div class="grid grid-cols-1 gap-2">
-      <%= for phase when phase.side == :radiant <- assigns.draft.phases do %>
-        <div class="ring-4 <%= if phase.order == assigns.draft.current_phase, do: 'ring-opacity-100', else: 'ring-opacity-50' %> <%= get_ring_color(phase.type) %>"><%= phase.side %>-<%= phase.type %></div>
-      <% end %>
-      </div>
-      <div class="grid grid-cols-1 gap-2">
-      <%= for phase when phase.side == :dire <- assigns.draft.phases do %>
-        <div class="ring-4 <%= if phase.order == assigns.draft.current_phase, do: 'ring-opacity-100', else: 'ring-opacity-50' %> <%= get_ring_color(phase.type) %>"><%= phase.side %>-<%= phase.type %></div>
-      <% end %>
+    <div class="grid p-3 gap-4 grid-cols-8 h-48 overflow-y-auto">
+      <%= for hero <- assigns.heroes do %>
+      <div class="ring-4 text-center" phx-click="pick_hero" phx-value-hero="<%= hero.id %>">
+        <%= hero.name %>
       </div>
       <% end %>
     </div>
@@ -48,17 +42,24 @@ defmodule CaptainsmodeWeb.DraftLive do
   @impl true
   def mount(%{"draft_id" => draft_id}, _session, socket) do
     username = get_connect_params(socket)["user_data"]["username"]
+    heroes = Heroes.list_heroes()
 
     case connected?(socket) do
-      true -> connected_mount(draft_id, socket)
-      false -> {:ok, assign(socket, %{username: username, draft: %DraftState{id: draft_id}})}
+      true ->
+        connected_mount(draft_id, socket)
+
+      false ->
+        {:ok,
+         assign(socket, %{username: username, draft: %DraftState{id: draft_id}, heroes: heroes})}
     end
   end
 
   def connected_mount(draft_id, socket) do
     username = get_connect_params(socket)["user_data"]["username"]
+    heroes = Heroes.list_heroes()
+
     {:ok, draft_state} = DraftServer.join(draft_id, username)
-    {:ok, assign(socket, %{username: username, draft: draft_state})}
+    {:ok, assign(socket, %{username: username, draft: draft_state, heroes: heroes})}
   end
 
   @impl true
@@ -71,6 +72,16 @@ defmodule CaptainsmodeWeb.DraftLive do
         socket = put_flash(socket, :error, "#{String.capitalize(side)} has already been picked")
         {:noreply, assign(socket, %{draft: draft_state})}
     end
+  end
+
+  @impl true
+  def handle_event("pick_hero", %{"hero" => hero_id}, socket) do
+    case DraftServer.pick_hero(socket.assigns.draft.id, hero_id) do
+      {:ok, draft_state} ->
+        {:noreply, assign(socket, %{draft: draft_state})}
+    end
+
+    {:noreply, assign(socket, %{})}
   end
 
   def get_side_attributes(assigns, side) do

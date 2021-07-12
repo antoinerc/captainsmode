@@ -19,8 +19,16 @@ defmodule Captainsmode.DraftServer do
     GenServer.call(via(draft_id), {:join, player_name})
   end
 
+  @doc """
+  Allow a player to change side
+  """
+  @spec change_side(String.t(), String.t(), atom()) :: term()
   def change_side(draft_id, player_name, side) do
     GenServer.call(via(draft_id), {:change_side, player_name, side})
+  end
+
+  def pick_hero(draft_id, hero_id) do
+    GenServer.call(via(draft_id), {:pick_hero, hero_id})
   end
 
   @impl true
@@ -36,6 +44,16 @@ defmodule Captainsmode.DraftServer do
   @impl true
   def handle_call({:change_side, player_name, side}, _from, state) do
     with {:ok, new_state} <- Drafts.change_side(state, player_name, side) do
+      {:reply, {:ok, new_state}, new_state}
+    else
+      {:error, {code, state}} ->
+        {:reply, {:error, code, state}, state}
+    end
+  end
+
+  @impl true
+  def handle_call({:pick_hero, hero_id}, _from, state) do
+    with {:ok, new_state} <- Drafts.pick_hero(state, hero_id) do
       {:reply, {:ok, new_state}, new_state}
     else
       {:error, {code, state}} ->
