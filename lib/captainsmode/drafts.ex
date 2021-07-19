@@ -90,20 +90,45 @@ defmodule Captainsmode.Drafts do
   end
 
   def pick_hero(draft_state, hero_id) do
-    case Enum.member?(draft_state.phases, %{hero: hero_id}) do
+    case Enum.member?(draft_state.radiant_choices, %{hero: hero_id}) ||
+           Enum.member?(draft_state.dire_choices, %{hero: hero_id}) do
       true ->
         {:error, {:hero_picker, draft_state}}
 
       _ ->
-        current_phase_index =
-          Enum.find_index(draft_state.phases, fn phase -> phase.hero == nil end)
+        is_radiant_turn =
+          Enum.any?(draft_state.radiant_choices, fn choice ->
+            choice.order == draft_state.current_phase
+          end)
 
-        {:ok,
-         %DraftState{
-           draft_state
-           | phases:
-               List.update_at(draft_state.phases, current_phase_index, &%{&1 | hero: hero_id})
-         }}
+        case is_radiant_turn do
+          true ->
+            {:ok,
+             %DraftState{
+               draft_state
+               | radiant_choices:
+                   List.update_at(
+                     draft_state.radiant_choices,
+                     draft_state.current_phase,
+                     &%{&1 | hero: hero_id}
+                   ),
+                   current_phase: draft_state.current_phase + 1
+             }}
+
+          false ->
+            {:ok,
+             %DraftState{
+               draft_state
+               | dire_choices:
+                   List.update_at(
+                     draft_state.dire_choices,
+                     draft_state.current_phase,
+                     &%{&1 | hero: hero_id}
+                   ),
+                   current_phase: draft_state.current_phase + 1
+
+             }}
+        end
     end
   end
 

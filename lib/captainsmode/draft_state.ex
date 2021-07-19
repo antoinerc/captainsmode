@@ -3,7 +3,7 @@ defmodule Captainsmode.DraftState do
 
   @type side :: :radiant | :dire
   @type status :: :pending | :ongoing
-  @type phase :: {side, atom(), integer(), Hero.id()}
+  @type phase :: {atom(), integer(), Hero.id()}
 
   @type choice :: {side, %Captainsmode.Heroes.Hero{}}
   @type participants_sides :: %{radiant: String.t(), dire: String.t()}
@@ -14,8 +14,8 @@ defmodule Captainsmode.DraftState do
           participants_sides: participants_sides(),
           status: status(),
           side_turn: side(),
-          current_phase: integer(),
-          phases: [phase()],
+          radiant_choices: [phase()],
+          dire_choices: [phase()],
           pick_timer: integer(),
           ban_timer: integer(),
           banned: list(choice()),
@@ -29,32 +29,34 @@ defmodule Captainsmode.DraftState do
     participants_sides: %{radiant: nil, dire: nil},
     status: :pending,
     side_turn: :radiant,
-    current_phase: 4,
-    phases: [
-      %{side: :radiant, type: :ban, order: 1, hero: nil},
-      %{side: :dire, type: :ban, order: 2, hero: nil},
-      %{side: :radiant, type: :ban, order: 3, hero: nil},
-      %{side: :dire, type: :ban, order: 4, hero: nil},
-      %{side: :radiant, type: :pick, order: 5, hero: nil},
-      %{side: :dire, type: :pick, order: 6, hero: nil},
-      %{side: :dire, type: :pick, order: 7, hero: nil},
-      %{side: :radiant, type: :pick, order: 8, hero: nil},
-      %{side: :radiant, type: :ban, order: 9, hero: nil},
-      %{side: :dire, type: :ban, order: 10, hero: nil},
-      %{side: :radiant, type: :ban, order: 11, hero: nil},
-      %{side: :dire, type: :ban, order: 12, hero: nil},
-      %{side: :radiant, type: :ban, order: 13, hero: nil},
-      %{side: :dire, type: :ban, order: 14, hero: nil},
-      %{side: :dire, type: :pick, order: 15, hero: nil},
-      %{side: :radiant, type: :pick, order: 16, hero: nil},
-      %{side: :dire, type: :pick, order: 17, hero: nil},
-      %{side: :radiant, type: :pick, order: 18, hero: nil},
-      %{side: :radiant, type: :ban, order: 19, hero: nil},
-      %{side: :dire, type: :ban, order: 20, hero: nil},
-      %{side: :radiant, type: :ban, order: 21, hero: nil},
-      %{side: :dire, type: :ban, order: 22, hero: nil},
-      %{side: :radiant, type: :pick, order: 23, hero: nil},
-      %{side: :dire, type: :pick, order: 24, hero: nil}
+    current_phase: 1,
+    radiant_choices: [
+      %{type: :ban, order: 1, hero: nil},
+      %{type: :ban, order: 3, hero: nil},
+      %{type: :pick, order: 5, hero: nil},
+      %{type: :pick, order: 7, hero: nil},
+      %{type: :ban, order: 9, hero: nil},
+      %{type: :ban, order: 11, hero: nil},
+      %{type: :ban, order: 13, hero: nil},
+      %{type: :pick, order: 16, hero: nil},
+      %{type: :pick, order: 18, hero: nil},
+      %{type: :ban, order: 19, hero: nil},
+      %{type: :ban, order: 21, hero: nil},
+      %{type: :pick, order: 23, hero: nil},
+    ],
+    dire_choices: [
+      %{type: :ban, order: 2, hero: nil},
+      %{type: :ban, order: 4, hero: nil},
+      %{type: :pick, order: 6, hero: nil},
+      %{type: :pick, order: 8, hero: nil},
+      %{type: :ban, order: 10, hero: nil},
+      %{type: :ban, order: 12, hero: nil},
+      %{type: :ban, order: 14, hero: nil},
+      %{type: :pick, order: 15, hero: nil},
+      %{type: :pick, order: 17, hero: nil},
+      %{type: :ban, order: 20, hero: nil},
+      %{type: :ban, order: 22, hero: nil},
+      %{type: :pick, order: 24, hero: nil}
     ],
     pick_timer: 30,
     ban_timer: 35,

@@ -29,13 +29,24 @@ defmodule CaptainsmodeWeb.DraftLive do
         </label>
         <p class="text-white italic"><%= assigns.draft.participants_sides.dire %></p>
     </div>
-    <div class="grid p-3 gap-4 grid-cols-8 h-48 overflow-y-auto">
+    <div class="grid p-3 gap-4 grid-cols-8 h-72 overflow-y-auto">
       <%= for hero <- assigns.heroes do %>
-      <div class="ring-4 text-center" phx-click="pick_hero" phx-value-hero="<%= hero.id %>">
+      <div class="ring-4 text-center h-12" phx-click="pick_hero" phx-value-hero="<%= hero.id %>">
         <%= hero.name %>
       </div>
       <% end %>
     </div>
+    <div class="grid grid-flow-row grid-cols-<%= length(assigns.draft.radiant_choices) %> grid-rows-2 gap-4">
+      <%= for %{hero: hero, type: type} <- assigns.draft.radiant_choices do %>
+      <div class="h-12 w-12 mt-6 ring-4 <%= get_ring_color(type) %>">
+        <%= hero %>
+      </div>
+      <% end %>
+      <%= for %{hero: hero, type: type} <- assigns.draft.dire_choices do %>
+      <div class="h-12 w-12 mt-6 ring-4 <%= get_ring_color(type) %>">
+        <%= hero %>
+      </div>
+      <% end %>
     """
   end
 
@@ -79,9 +90,10 @@ defmodule CaptainsmodeWeb.DraftLive do
     case DraftServer.pick_hero(socket.assigns.draft.id, hero_id) do
       {:ok, draft_state} ->
         {:noreply, assign(socket, %{draft: draft_state})}
+      {:error, :double_pick, draft_state} ->
+        socket = put_flash(socket, :error, "#{Enum.find(socket.assigns.heroes, fn x -> x.id == hero_id end).name}")
+        {:noreply, assign(socket, %{draft: draft_state})}
     end
-
-    {:noreply, assign(socket, %{})}
   end
 
   def get_side_attributes(assigns, side) do
@@ -99,8 +111,8 @@ defmodule CaptainsmodeWeb.DraftLive do
     end
   end
 
-  def get_ring_color(side) do
-    case side do
+  def get_ring_color(type) do
+    case type do
       :pick -> "ring-green-500"
       :ban -> "ring-red-500"
     end
