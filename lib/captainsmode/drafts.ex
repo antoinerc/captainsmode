@@ -89,46 +89,23 @@ defmodule Captainsmode.Drafts do
     do_change_side(draft_state, change_side_info)
   end
 
-  def pick_hero(draft_state, hero_id) do
-    case Enum.member?(draft_state.radiant_choices, %{hero: hero_id}) ||
-           Enum.member?(draft_state.dire_choices, %{hero: hero_id}) do
-      true ->
-        {:error, {:hero_picker, draft_state}}
+  def pick_hero(
+        %{phases: phases} = draft_state,
+        hero_id,
+        username
+      ) do
+    {next_slot, next_slot_index} = get_next_open_slot(phases)
 
-      _ ->
-        is_radiant_turn =
-          Enum.any?(draft_state.radiant_choices, fn choice ->
-            choice.order == draft_state.current_phase
-          end)
-
-        case is_radiant_turn do
-          true ->
-            {:ok,
-             %DraftState{
-               draft_state
-               | radiant_choices:
-                   List.update_at(
-                     draft_state.radiant_choices,
-                     draft_state.current_phase,
-                     &%{&1 | hero: hero_id}
-                   ),
-                   current_phase: draft_state.current_phase + 1
-             }}
-
-          false ->
-            {:ok,
-             %DraftState{
-               draft_state
-               | dire_choices:
-                   List.update_at(
-                     draft_state.dire_choices,
-                     draft_state.current_phase,
-                     &%{&1 | hero: hero_id}
-                   ),
-                   current_phase: draft_state.current_phase + 1
-
-             }}
-        end
+    with {:ok, _} <- validate_current_side_picking(draft_state, next_slot, username),
+         {:ok, _} <- validate_hero_not_taken(draft_state, hero_id) do
+      {:ok,
+       %DraftState{
+         draft_state
+         | phases: List.update_at(phases, next_slot_index, &%{&1 | hero: hero_id})
+       }}
+    else
+      {:error, reason} ->
+        {:error, {reason, draft_state}}
     end
   end
 
@@ -206,6 +183,35 @@ defmodule Captainsmode.Drafts do
 
       _ ->
         {:error, {:side_full, draft_state}}
+    end
+  end
+
+  defp get_next_open_slot(phases) do
+    phases
+    |> Enum.with_index()
+    |> Enum.find(fn {phase, _} -> phase.hero == nil end)
+  end
+
+  defp get_player_side(participants_sides, username) do
+    case participants_sides do
+      %{radiant: ^username, dire: _} -> :radiant
+      _ -> :dire
+    end
+  end
+
+  defp validate_hero_not_taken(draft_state, hero) do
+    case Enum.any?(draft_state.phases, fn phase -> phase.hero == hero end) do
+      true -> {:error, :already_picked}
+      _ -> {:ok, draft_state}
+    end
+  end
+
+  defp validate_current_side_picking(draft_state, phase, username) do
+    player_side = get_player_side(draft_state.participants_sides, username)
+
+    case phase.side == player_side do
+      true -> {:ok, draft_state}
+      _ -> {:error, :not_side_turn}
     end
   end
 end

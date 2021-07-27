@@ -29,24 +29,26 @@ defmodule CaptainsmodeWeb.DraftLive do
         </label>
         <p class="text-white italic"><%= assigns.draft.participants_sides.dire %></p>
     </div>
+    <%= if all_sides_filled?(assigns.draft) do %>
     <div class="grid p-3 gap-4 grid-cols-8 h-72 overflow-y-auto">
       <%= for hero <- assigns.heroes do %>
-      <div class="ring-4 text-center h-12" phx-click="pick_hero" phx-value-hero="<%= hero.id %>">
+      <div class="ring-4 text-center h-12" phx-click="pick_hero" phx-value-hero=<%= hero.id %>>
         <%= hero.name %>
       </div>
       <% end %>
     </div>
-    <div class="grid grid-flow-row grid-cols-<%= length(assigns.draft.radiant_choices) %> grid-rows-2 gap-4">
-      <%= for %{hero: hero, type: type} <- assigns.draft.radiant_choices do %>
+    <div class="grid grid-flow-row grid-cols-<%= div(length(assigns.draft.phases), 2) %> grid-rows-2 gap-4">
+      <%= for %{hero: hero, type: type, side: side} when side == :radiant <- assigns.draft.phases do %>
       <div class="h-12 w-12 mt-6 ring-4 <%= get_ring_color(type) %>">
         <%= hero %>
       </div>
       <% end %>
-      <%= for %{hero: hero, type: type} <- assigns.draft.dire_choices do %>
+      <%= for %{hero: hero, type: type, side: side} when side == :dire <- assigns.draft.phases do %>
       <div class="h-12 w-12 mt-6 ring-4 <%= get_ring_color(type) %>">
         <%= hero %>
       </div>
       <% end %>
+    <% end %>
     """
   end
 
@@ -80,18 +82,43 @@ defmodule CaptainsmodeWeb.DraftLive do
         {:noreply, assign(socket, %{draft: draft_state})}
 
       {:error, :side_full, draft_state} ->
-        socket = put_flash(socket, :error, "#{String.capitalize(side)} has already been picked")
+        socket =
+          put_flash(
+            socket,
+            :error,
+            "#{String.capitalize(Atom.to_string(side))} has already been picked"
+          )
+
         {:noreply, assign(socket, %{draft: draft_state})}
     end
   end
 
   @impl true
-  def handle_event("pick_hero", %{"hero" => hero_id}, socket) do
-    case DraftServer.pick_hero(socket.assigns.draft.id, hero_id) do
+  def handle_event("pick_hero", %{"hero" => hero_id}, %{assigns: assigns} = socket) do
+    {hero_id, ""} = Integer.parse(hero_id)
+
+    case DraftServer.pick_hero(assigns.draft.id, hero_id, assigns.username) do
       {:ok, draft_state} ->
         {:noreply, assign(socket, %{draft: draft_state})}
-      {:error, :double_pick, draft_state} ->
-        socket = put_flash(socket, :error, "#{Enum.find(socket.assigns.heroes, fn x -> x.id == hero_id end).name}")
+
+      {:error, :already_picked, draft_state} ->
+        socket =
+          put_flash(
+            socket,
+            :error,
+            "#{Enum.find(socket.assigns.heroes, fn x -> x.id == hero_id end).name} has already been picked"
+          )
+
+        {:noreply, assign(socket, %{draft: draft_state})}
+
+      {:error, :not_side_turn, draft_state} ->
+        socket =
+          put_flash(
+            socket,
+            :error,
+            "It is not your turn to pick"
+          )
+
         {:noreply, assign(socket, %{draft: draft_state})}
     end
   end

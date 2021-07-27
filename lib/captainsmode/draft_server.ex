@@ -1,4 +1,7 @@
 defmodule Captainsmode.DraftServer do
+  @moduledoc """
+  GenServer implementation used to manipulate the `Captainsmode.DraftState`.
+  """
   use GenServer, restart: :transient
 
   alias Captainsmode.{Drafts, DraftState}
@@ -27,37 +30,34 @@ defmodule Captainsmode.DraftServer do
     GenServer.call(via(draft_id), {:change_side, player_name, side})
   end
 
-  def pick_hero(draft_id, hero_id) do
-    GenServer.call(via(draft_id), {:pick_hero, hero_id})
+  def pick_hero(draft_id, hero_id, username) do
+    GenServer.call(via(draft_id), {:pick_hero, hero_id, username})
   end
 
   @impl true
   def handle_call({:join, player_name}, _from, state) do
-    with {:ok, new_state} <- Drafts.join(state, player_name) do
-      {:reply, {:ok, new_state}, new_state}
-    else
-      {:error, {code, state}} ->
-        {:reply, {:error, code, state}, state}
+    case Drafts.join(state, player_name) do
+      {:ok, new_state} -> {:reply, {:ok, new_state}, new_state}
+      {:error, {code, state}} -> {:reply, {:error, code, state}, state}
     end
   end
 
   @impl true
   def handle_call({:change_side, player_name, side}, _from, state) do
-    with {:ok, new_state} <- Drafts.change_side(state, player_name, side) do
-      {:reply, {:ok, new_state}, new_state}
-    else
+    case Drafts.change_side(state, player_name, side) do
+      {:ok, new_state} ->
+        {:reply, {:ok, new_state}, new_state}
+
       {:error, {code, state}} ->
         {:reply, {:error, code, state}, state}
     end
   end
 
   @impl true
-  def handle_call({:pick_hero, hero_id}, _from, state) do
-    with {:ok, new_state} <- Drafts.pick_hero(state, hero_id) do
-      {:reply, {:ok, new_state}, new_state}
-    else
-      {:error, {code, state}} ->
-        {:reply, {:error, code, state}, state}
+  def handle_call({:pick_hero, hero_id, username}, _from, state) do
+    case Drafts.pick_hero(state, hero_id, username) do
+      {:ok, new_state} -> {:reply, {:ok, new_state}, new_state}
+      {:error, {code, state}} -> {:reply, {:error, code, state}, state}
     end
   end
 
